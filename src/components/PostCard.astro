@@ -1,0 +1,12 @@
+---
+import Tags from './Tags.astro';
+
+import type { CollectionEntry } from 'astro:content';
+import {localizedPath,defaultLocale,type Locale} from '../i18n';
+interface Props { post: CollectionEntry<'blog'>; locale?:Locale; }
+const { post,locale=defaultLocale } = Astro.props;
+---
+<a class="content-card" href={localizedPath(`/blog/${post.id}/`,locale)}>
+  <div class="card-heading"><h3>{post.data.title}</h3><time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0,10)}</time></div>
+  <p>{post.data.description}</p><Tags tags={post.data.tags.slice(0,3)} />
+</a>

@@ -1,0 +1,6 @@
+---
+import View from '../../views/Project.astro';
+import {getProjects} from '../../lib/content';
+export async function getStaticPaths(){return (await getProjects()).map(project=>({params:{slug:project.id},props:{project}}));}
+---
+<View {...Astro.props} />

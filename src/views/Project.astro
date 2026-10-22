@@ -1,0 +1,15 @@
+---
+import {localeFromPath,localizedPath,translator,type Locale} from '../i18n';
+const locale:Locale=Astro.props.locale??localeFromPath(Astro.url.pathname);
+const t=translator(locale);
+const withBase=(path:string)=>localizedPath(path,locale);
+import { render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Tags from '../components/Tags.astro';
+import { getProjects } from '../lib/content';
+interface Props {locale?:Locale;project:Awaited<ReturnType<typeof getProjects>>[number]}
+
+const { project } = Astro.props;
+const { Content } = await render(project.entry);
+---
+<Layout {locale} title={project.data.title} description={project.data.description}><main id="main" class="page"><a class="back-link" href={withBase('/portfolio/')}>← {t("nav.portfolio")}</a><header class="article-header"><h1>{project.data.title}</h1><p class="article-description">{project.data.description}</p><div style="margin-top:20px"><Tags tags={project.data.tags}/></div><div class="article-actions">{project.data.github && <a class="outline-button" href={project.data.github} target="_blank" rel="noopener noreferrer">GitHub →</a>}{project.data.live && <a class="outline-button" href={project.data.live.startsWith('/') ? withBase(project.data.live) : project.data.live}>{t("list.live")}</a>}</div></header>{!project.translated && <p class="translation-note">{t("article.fallback")}</p>}<article lang={project.translated?undefined:"en"} class="content-prose"><Content/></article><div class="footer-links"><a href={withBase('/portfolio/')}>← {t("list.allProjects")}</a><a href={withBase('/')}>{t("nav.home")}</a></div></main></Layout>

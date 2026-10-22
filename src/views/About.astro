@@ -1,0 +1,18 @@
+---
+import {localeFromPath,localizedPath,translator,type Locale} from '../i18n';
+const locale:Locale=Astro.props.locale??localeFromPath(Astro.url.pathname);
+const t=translator(locale);
+const withBase=(path:string)=>localizedPath(path,locale);
+import Layout from '../layouts/Layout.astro';
+import Tags from '../components/Tags.astro';
+import { site } from '../config';
+
+---
+<Layout {locale} title={t("nav.about")}>
+  <main id="main" class="page">
+    <div class="profile"><div class="avatar" aria-hidden="true">mlii</div><div><h1>{site.author}</h1><p class="role">{t("site.role")}</p>{[t("site.bio1"),t("site.bio2")].map(p=><p>{p}</p>)}{site.location && <p class="date">⌖ {site.location}</p>}</div></div>
+    <section class="about-section"><h2 class="gradient-text">{t("about.skills")}</h2>{Object.entries(site.skills).map(([group, skills]) => <div class="skill-row"><h3>{t(`about.${group}`,{defaultValue:group})}</h3><Tags tags={skills} /></div>)}</section>
+    {site.experience.length > 0 && <section class="about-section"><h2 class="gradient-text">{t("about.experience")}</h2>{site.experience.map(item => <div class="timeline-item"><small>{item.period}</small><h3>{item.role}</h3><p>{item.company}</p><p>{item.description}</p></div>)}</section>}
+    <section class="about-section"><h2 class="gradient-text">{t("about.contact")}</h2><dl class="contact-list">{site.email && <><dt>{t("about.email")}:</dt><dd><a href={`mailto:${site.email}`}>{site.email}</a></dd></>}<dt>GitHub:</dt><dd><a href={site.github} target="_blank" rel="noopener noreferrer">{site.github.replace('https://','')}</a></dd>{site.linkedin && <><dt>LinkedIn:</dt><dd><a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a></dd></>}<dt>{t("nav.resume")}:</dt><dd><a href={withBase('/resume/')}>{t("nav.resume")}</a></dd></dl></section>
+  </main>
+</Layout>

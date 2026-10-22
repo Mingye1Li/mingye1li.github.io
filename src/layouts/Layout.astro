@@ -1,0 +1,70 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.svelte';
+import { getSearchEntries } from '../lib/content';
+import { site } from '../config';
+import { withBase } from '../lib/paths';
+import '../styles/global.css';
+import {localeFromPath,localizedPath,translator,languages,locales,defaultLocale,type Locale} from '../i18n';
+interface Props { title?: string; description?: string; article?: boolean; locale?:Locale; }
+const { title, article = false, locale=localeFromPath(Astro.url.pathname) } = Astro.props;
+const t=translator(locale),description=Astro.props.description??t('site.description');
+const pageTitle = title ? `${title} | ${site.name}` : `${site.name} | ${t('site.role')}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const entries = await getSearchEntries(locale);
+const languageHomes=Object.fromEntries(locales.map(code=>[code,localizedPath('/',code)]));
+---
+<!doctype html>
+<html lang={languages[locale].htmlLang} data-locale={locale} data-theme="dark" data-color-mode="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {locales.map(code=><link rel="alternate" hreflang={languages[code].htmlLang} href={new URL(localizedPath(Astro.url.pathname,code),Astro.site)}/>)}
+    <link rel="alternate" hreflang="x-default" href={new URL(localizedPath(Astro.url.pathname,defaultLocale),Astro.site)}/>
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="alternate" type="application/rss+xml" title={site.name} href={localizedPath('/rss.xml',locale)} />
+    <script is:inline define:vars={{languageHomes,defaultLocale}}>
+      try {
+        const preferred=localStorage.getItem('mlii01-locale');
+        if(location.pathname===languageHomes[defaultLocale] && preferred && preferred!==defaultLocale && Object.hasOwn(languageHomes,preferred)) location.replace(languageHomes[preferred]+location.search+location.hash);
+      } catch {}
+    </script>
+    <script is:inline>
+      (() => {
+        const themes = ['light','dark','dracula','nord','night','coffee','sunset','forest','synthwave','cyberpunk','retro','dim','abyss','winter','business','cupcake','emerald','halloween','lofi','luxury'];
+        const fonts = { inter: "'Inter',system-ui,sans-serif", system: 'system-ui,sans-serif', jetbrains: "'JetBrains Mono',monospace", firacode: "'Fira Code',monospace", hack: "'Hack',monospace", meslo: "'MesloLGS',monospace", iosevka: "'Iosevka',monospace" };
+        try {
+          const stored = key => localStorage.getItem(`mlii01-${key}`) ?? localStorage.getItem(`mlii0151-${key}`);
+          const theme = stored('theme');
+          document.documentElement.dataset.theme = themes.includes(theme) ? theme : 'dark';
+          document.documentElement.dataset.colorMode = ['light','nord','cyberpunk','retro','winter','cupcake','emerald','lofi'].includes(theme) ? 'light' : 'dark';
+          document.documentElement.style.setProperty('--ui-font-sans', fonts[stored('body-font')] || fonts.inter);
+          document.documentElement.style.setProperty('--ui-font-mono', fonts[stored('font')] || fonts.jetbrains);
+        } catch {}
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">{t('nav.skip')}</a>
+    <Header {locale} entries={entries} pathname={Astro.url.pathname} client:load transition:persist={`site-header-${locale}`} />
+    <slot />
+    <script>
+      import '../scripts/widgets';
+      document.addEventListener('astro:before-swap', (event) => {
+        const e = event as Event & { newDocument: Document };
+        e.newDocument.documentElement.dataset.theme = document.documentElement.dataset.theme;
+        e.newDocument.documentElement.dataset.colorMode = document.documentElement.dataset.colorMode;
+        e.newDocument.documentElement.style.cssText = document.documentElement.style.cssText;
+      });
+    </script>
+  </body>
+</html>

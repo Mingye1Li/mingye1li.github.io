@@ -1,0 +1,43 @@
+{
+  "name": "mlii01-home",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/astro.mjs dev --host 127.0.0.1",
+    "build": "node scripts/astro.mjs build --force",
+    "preview": "node scripts/astro.mjs preview --host 127.0.0.1",
+    "check": "node scripts/astro.mjs check",
+    "test": "tsx --test tests/*.test.ts",
+    "verify": "npm run check && npm test && npm run build && node scripts/verify-build.mjs"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.4",
+    "@astrojs/mdx": "^8.1.0",
+    "@astrojs/rss": "^4.0.12",
+    "@astrojs/sitemap": "^3.5.0",
+    "@astrojs/svelte": "^9.1.0",
+    "@expressive-code/plugin-collapsible-sections": "^0.44.3",
+    "@expressive-code/plugin-line-numbers": "^0.44.3",
+    "@fontsource/fira-code": "^5.2.6",
+    "@fontsource/inter": "^5.2.6",
+    "@fontsource/jetbrains-mono": "^5.2.6",
+    "@tailwindcss/vite": "^4.1.12",
+    "astro": "^7.4.2",
+    "astro-expressive-code": "^0.44.3",
+    "daisyui": "^5.0.50",
+    "i18next": "^26.5.4",
+    "mermaid": "^12.2.0",
+    "remark-directive": "^4.0.0",
+    "svelte": "^5.38.6",
+    "tailwindcss": "^4.1.12",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@types/node": "^22.18.0",
+    "node": "^22.23.4",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

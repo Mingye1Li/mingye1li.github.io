@@ -1,0 +1,37 @@
+---
+import {localeFromPath,localizedPath,translator,type Locale} from '../i18n';
+const locale:Locale=Astro.props.locale??localeFromPath(Astro.url.pathname);
+const t=translator(locale);
+const withBase=(path:string)=>localizedPath(path,locale);
+import { render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import TableOfContents from '../components/TableOfContents.svelte';
+import { getPosts } from '../lib/content';
+import { categorySlug } from '../lib/paths';
+interface Props {locale?:Locale;post:Awaited<ReturnType<typeof getPosts>>[number]}
+const { post } = Astro.props;
+const { Content, headings } = await render(post.entry);
+const tocHeadings = headings.filter(heading => heading.depth >= 2 && heading.depth <= 3);
+const posts = await getPosts(locale);
+const index = posts.findIndex(p => p.id === post.id);
+const newer = posts[index-1], older = posts[index+1];
+const related = posts.filter(p => p.id !== post.id && p.data.tags.some(t => post.data.tags.includes(t))).slice(0,3);
+const minutes = Math.max(1, Math.ceil((post.body ?? '').split(/\s+/).length / 220));
+---
+<Layout {locale} title={post.data.title} description={post.data.description} article>
+  <main id="main" class:list={['page', 'article-page', { 'with-toc': tocHeadings.length > 0 }]}>
+    <a href={withBase('/blog/')} class="back-link">← {t("nav.blog")}</a>
+    <header class="article-header"><h1>{post.data.title}</h1><p class="article-description">{post.data.description}</p>{post.data.categories.map(category => <div class="filter-bar" style="margin:16px 0 0"><a href={withBase(`/blog/category/${categorySlug(category)}/`)}>{category.replaceAll('/',' / ')}</a></div>)}<div class="article-meta"><time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0,10)}</time><span>|</span><span>{t("article.minutes",{count:minutes})}</span><span>|</span>{post.data.tags.map(tag => <span>{tag}</span>)}</div></header>
+    <div class="article-actions"><button data-copy-markdown data-source={withBase(`/raw/blog/${post.id}.md`)}>{t("article.copy")}</button><button data-terminal-command={`cat /blog/${post.id}.md`}>{t("article.terminal")}</button></div>
+    <div class="article-layout">
+    {tocHeadings.length > 0 && <aside class="article-toc"><TableOfContents {locale} headings={tocHeadings} client:load /></aside>}
+    <div class="article-body">
+    {!post.translated && <p class="translation-note">{t("article.fallback")}</p>}
+    <article lang={post.translated?undefined:"en"} id="article-content" class="content-prose"><Content /></article>
+    <nav class="article-pagination" aria-label={t("article.navigation")}>{older ? <a href={withBase(`/blog/${older.id}/`)}><small>← {t("article.older")}</small>{older.data.title}</a> : <span></span>}{newer && <a href={withBase(`/blog/${newer.id}/`)}><small>{t("article.newer")} →</small>{newer.data.title}</a>}</nav>
+    {related.length > 0 && <section class="related-posts"><h2>{t("article.related")}</h2>{related.map(p => <a href={withBase(`/blog/${p.id}/`)}>{p.data.title} →</a>)}</section>}
+    <div class="footer-links"><a href={withBase('/blog/')}>← {t("list.allPosts")}</a><a href={withBase('/')}>{t("nav.home")}</a></div>
+    </div>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,15 @@
+---
+import {localeFromPath,localizedPath,translator,type Locale} from '../i18n';
+const locale:Locale=Astro.props.locale??localeFromPath(Astro.url.pathname);
+const t=translator(locale);
+const withBase=(path:string)=>localizedPath(path,locale);
+import Layout from '../layouts/Layout.astro';
+import BlogBrowser from '../components/BlogBrowser.svelte';
+import { getPosts } from '../lib/content';
+
+
+const { name } = Astro.props;
+const entries = (await getPosts(locale)).filter(p => p.data.categories.some(c => c === name || c.startsWith(name+'/')));
+const posts = entries.map(p => ({ id:p.id, ...p.data, date:p.data.date.toISOString().slice(0,10) }));
+---
+<Layout {locale} title={name}><main id="main" class="page"><a class="back-link" href={withBase('/blog/')}>← {t("nav.blog")}</a><div class="page-title" style="margin-top:24px"><h1 class="gradient-text">{name.replaceAll('/', ' / ')}</h1><small>{t("list.posts",{count:posts.length})}</small></div><BlogBrowser {locale} posts={posts} client:load /><div class="footer-links"><a href={withBase('/blog/')}>← {t("list.allPosts")}</a><a href={withBase('/')}>{t("nav.home")}</a></div></main></Layout>

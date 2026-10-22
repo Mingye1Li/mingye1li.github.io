@@ -1,0 +1,14 @@
+---
+import {localeFromPath,localizedPath,translator,type Locale} from '../i18n';
+const locale:Locale=Astro.props.locale??localeFromPath(Astro.url.pathname);
+const t=translator(locale);
+const withBase=(path:string)=>localizedPath(path,locale);
+import Layout from '../layouts/Layout.astro';
+import BlogBrowser from '../components/BlogBrowser.svelte';
+import { getPosts } from '../lib/content';
+import { categorySlug } from '../lib/paths';
+const entries = await getPosts(locale);
+const posts = entries.map(p => ({ id: p.id, ...p.data, date: p.data.date.toISOString().slice(0,10) }));
+const categories = [...new Set(entries.flatMap(p => p.data.categories.map(c => c.split('/')[0])))];
+---
+<Layout {locale} title={t("nav.blog")}><main id="main" class="page"><div class="page-title"><h1 class="gradient-text">{t("nav.blog")}</h1><small>{t("list.posts",{count:posts.length})}</small></div><div class="filter-bar">{categories.map(category => <a href={withBase(`/blog/category/${categorySlug(category)}/`)}>{category} <span class="date">{entries.filter(p => p.data.categories.some(c => c === category || c.startsWith(category+'/'))).length}</span></a>)}</div><BlogBrowser {locale} posts={posts} client:load /><div class="footer-links"><a href={withBase('/')}>← {t("nav.home")}</a><a href={withBase('/rss.xml')}>RSS ↗</a></div></main></Layout>

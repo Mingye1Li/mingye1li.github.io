@@ -1,0 +1,24 @@
+{
+  "source": "https://codem8.dev/_astro/AsciiHero.DGqeTpcl.js",
+  "frames": 60,
+  "grid": [
+    80,
+    24
+  ],
+  "pointer": {
+    "enterFrame": 20,
+    "exitFrame": 40,
+    "x": 30,
+    "y": 12
+  },
+  "traces": {
+    "flow-field": "f018bbd63738bb3502dcf1ccd1bfc4529724b492512122453601821cc4055129",
+    "plasma": "9de6faa8205adc5f6ab63d46c70bb6be95e9d27fad3ea787d5d5cf1f7cdd3966",
+    "game-of-life": "7713fd7c4159d7468941845e7d343612f592c6dba291d7e5944796b0cec9c6c0",
+    "reaction-diffusion": "c2a9eab78162ca18a3fa04a1dbd37ee4dba6345f132b45bce766198f9cc4b6fd",
+    "flocking": "d58c4c73854fb20b0fd47d4b2de1c1cbddcb56383472d681c4375ec1a20ff449",
+    "wave-interference": "0e1b4c61c3484fbfdd6a7ba0fd6dfbb87399e14d4cfc0758dd0b9ae1039aff31",
+    "contour": "62ec5ea38ac6557b037e57ea54709ecc8d91e39448b39235dff6d0a827a755bb",
+    "attractor": "30e30908a43c242fec28d8945a146b1e904754af868e56555c63fad61b0fc822"
+  }
+}

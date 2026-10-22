@@ -1,0 +1,35 @@
+---
+import Home from '../views/Home.astro';
+import About from '../views/About.astro';
+import Blog from '../views/Blog.astro';
+import Article from '../views/Article.astro';
+import Category from '../views/Category.astro';
+import Projects from '../views/Projects.astro';
+import Project from '../views/Project.astro';
+import Resume from '../views/Resume.astro';
+import NotFound from '../views/NotFound.astro';
+import {locales,defaultLocale,type Locale} from '../i18n';
+import {getPosts,getProjects} from '../lib/content';
+import {categorySlug} from '../lib/paths';
+import type {GetStaticPathsResult} from 'astro';
+export async function getStaticPaths(){
+  const paths:GetStaticPathsResult=[];
+  for(const locale of locales.filter(code=>code!==defaultLocale)){
+    const [posts,projects]=await Promise.all([getPosts(locale),getProjects(locale)]);
+    const add=(path:string,view:string,extra:Record<string,unknown>={})=>paths.push({params:{localized:locale+path.replace(/\/$/,'')},props:{locale,view,...extra}});
+    add('/','Home');add('/about/','About');add('/blog/','Blog');add('/portfolio/','Projects');add('/resume/','Resume');add('/404/','NotFound');
+    posts.forEach(post=>add(`/blog/${post.id}/`,'Article',{post}));
+    projects.forEach(project=>add(`/portfolio/${project.id}/`,'Project',{project}));
+    const categories=new Set<string>();
+    posts.forEach(post=>post.data.categories.forEach(category=>category.split('/').forEach((_,i,parts)=>categories.add(parts.slice(0,i+1).join('/')))));
+    categories.forEach(name=>add(`/blog/category/${categorySlug(name)}/`,'Category',{name}));
+  }
+  return paths;
+}
+const views={Home,About,Blog,Category,Projects,Resume,NotFound};
+const {view,locale,...props}=Astro.props;
+const View=views[view as keyof typeof views];
+---
+{view==='Article' ? <Article locale={locale as Locale} post={props.post as Awaited<ReturnType<typeof getPosts>>[number]}/> :
+ view==='Project' ? <Project locale={locale as Locale} project={props.project as Awaited<ReturnType<typeof getProjects>>[number]}/> :
+ <View locale={locale as Locale} {...props}/>}

@@ -1,0 +1,12 @@
+---
+import {localeFromPath,localizedPath,translator,type Locale} from '../i18n';
+const locale:Locale=Astro.props.locale??localeFromPath(Astro.url.pathname);
+const t=translator(locale);
+const withBase=(path:string)=>localizedPath(path,locale);
+import Layout from '../layouts/Layout.astro';
+import ProjectBrowser from '../components/ProjectBrowser.svelte';
+import { getProjects } from '../lib/content';
+
+const projects = (await getProjects(locale)).map(p => ({ id:p.id,...p.data }));
+---
+<Layout {locale} title={t("nav.portfolio")}><main id="main" class="page"><div class="page-title"><h1 class="gradient-text">{t("nav.portfolio")}</h1><small>{t("list.projects",{count:projects.length})}</small></div><ProjectBrowser {locale} {projects} client:load /><div class="footer-links"><a href={withBase('/')}>← {t("nav.home")}</a></div></main></Layout>

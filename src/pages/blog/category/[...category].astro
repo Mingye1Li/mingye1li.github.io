@@ -1,0 +1,7 @@
+---
+import View from '../../../views/Category.astro';
+import {getPosts} from '../../../lib/content';
+import {categorySlug} from '../../../lib/paths';
+export async function getStaticPaths(){const names=new Set<string>();(await getPosts()).forEach(p=>p.data.categories.forEach(c=>c.split('/').forEach((_,i,parts)=>names.add(parts.slice(0,i+1).join('/')))));return [...names].map(name=>({params:{category:categorySlug(name)},props:{name}}));}
+---
+<View {...Astro.props} />

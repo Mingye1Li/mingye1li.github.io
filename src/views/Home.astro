@@ -1,0 +1,21 @@
+---
+import {localeFromPath,localizedPath,translator,type Locale} from '../i18n';
+const locale:Locale=Astro.props.locale??localeFromPath(Astro.url.pathname);
+const t=translator(locale);
+const withBase=(path:string)=>localizedPath(path,locale);
+import Layout from '../layouts/Layout.astro';
+import AsciiHero from '../components/AsciiHero.svelte';
+import PostCard from '../components/PostCard.astro';
+import Tags from '../components/Tags.astro';
+import { getPosts, getProjects } from '../lib/content';
+
+const posts = (await getPosts(locale)).slice(0,3);
+const projects = (await getProjects(locale)).filter(p => p.data.featured);
+---
+<Layout {locale}>
+  <AsciiHero {locale} client:load />
+  <main id="main" class="page home-content">
+    <section><div class="section-heading"><h2 class="gradient-text">{t("home.latest")}</h2><a href={withBase('/blog/')}>{t("home.all")}</a></div><div class="post-list">{posts.map(post => <PostCard {locale} post={post} />)}</div></section>
+    <section><div class="section-heading"><h2 class="gradient-text">{t("home.featured")}</h2><a href={withBase('/portfolio/')}>{t("home.all")}</a></div><div class="project-grid">{projects.map(project => <a href={withBase(`/portfolio/${project.id}/`)} class="content-card"><h3>{project.data.title}</h3><p>{project.data.description}</p><Tags tags={project.data.tags.slice(0,3)} /></a>)}</div></section>
+  </main>
+</Layout>
